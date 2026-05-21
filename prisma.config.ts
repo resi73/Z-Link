@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const config: any = {
   schema: "prisma/schema.prisma",
   migrations: {

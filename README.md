@@ -62,33 +62,44 @@ Z-Link là một ứng dụng rút gọn URL chất lượng cao, có hiệu nă
 ## 🚀 Hướng Dẫn Cài Đặt & Chạy Môi Trường Cục Bộ (Local)
 
 ### 1. Chuẩn bị
+
 Máy tính của bạn cần được cài đặt sẵn:
+
 - **Node.js**: Phiên bản 18.x trở lên (khuyên dùng v20.x).
 - **npm** (đi kèm Node.js).
 
 ### 2. Cài đặt các gói thư viện
+
 Tại thư mục gốc của dự án, chạy lệnh:
+
 ```bash
 npm install
 ```
 
 ### 3. Tạo file cấu hình môi trường `.env`
+
 Nhân bản file `.env` hoặc tạo mới file `.env` ở thư mục gốc với nội dung:
+
 ```env
 DATABASE_URL="file:./dev.db"
 ```
 
 ### 4. Khởi tạo database và đồng bộ Schema
+
 Chạy lệnh Prisma để khởi tạo file DB SQLite (`dev.db`) và sinh Client:
+
 ```bash
 npx prisma migrate dev --name init
 ```
 
 ### 5. Khởi động Server Phát Triển (Dev Mode)
+
 Chạy server local:
+
 ```bash
 npm run dev
 ```
+
 Mở trình duyệt truy cập: [http://localhost:3000](http://localhost:3000).
 
 ---
@@ -110,6 +121,7 @@ Vitest sẽ chạy kiểm thử và xuất ra báo cáo kết quả ngay trên T
 Để ứng dụng hoạt động công khai, phương án tối ưu và miễn phí 100% là kết hợp **Vercel** (hosting frontend/API) và **Supabase/Neon** (hỗ trợ database PostgreSQL).
 
 ### Bước 1: Đẩy mã nguồn lên GitHub cá nhân
+
 1. Tạo một repository trống trên trang GitHub của bạn (ví dụ đặt tên là `zlink-url-shortener`).
 2. Mở terminal tại thư mục dự án và thực hiện các lệnh sau:
    ```bash
@@ -122,28 +134,33 @@ Vitest sẽ chạy kiểm thử và xuất ra báo cáo kết quả ngay trên T
    ```
 
 ### Bước 2: Tạo Cơ Sở Dữ Liệu PostgreSQL miễn phí
+
 1. Truy cập **[Supabase](https://supabase.com)** hoặc **[Neon](https://neon.tech)** và đăng ký một tài khoản miễn phí.
 2. Tạo một Project mới. Sau khi project được tạo thành công, bạn sẽ nhận được một đường dẫn kết nối Database (Database Connection String).
 3. Lấy chuỗi kết nối dạng URL có định dạng tương tự như sau:
    `postgresql://postgres:<password>@<host-name>.supabase.co:5432/postgres?sslmode=require`
 
 ### Bước 3: Deploy lên Vercel
+
 1. Đăng nhập vào **[Vercel](https://vercel.com)** bằng tài khoản GitHub của bạn.
 2. Bấm nút **Add New** -> **Project**.
 3. Chọn repository chứa mã nguồn Z-Link bạn vừa đẩy lên ở Bước 1 và bấm **Import**.
 4. Tại phần **Environment Variables**, thêm biến môi trường sau:
    - **Key**: `DATABASE_URL`
-   - **Value**: *Dán chuỗi kết nối PostgreSQL thu được ở Bước 2 vào đây.*
+   - **Value**: _Dán chuỗi kết nối PostgreSQL thu được ở Bước 2 vào đây._
 5. Tại phần **Build & Development Settings**, cài đặt mặc định của dự án đã tự động cấu hình chạy:
    - Build Command: `prisma generate && next build` (điều này đảm bảo Prisma Client được build lại tương thích với môi trường serverless).
 6. Bấm nút **Deploy** và chờ khoảng 1-2 phút để hoàn tất.
 7. Vercel sẽ cung cấp cho bạn một link test công khai có đuôi `.vercel.app`.
 
 ### Bước 4: Đồng bộ cấu hình Database lên Server
+
 Sau khi cấu hình biến môi trường trên Vercel, để khởi tạo các bảng vật lý trên Postgres của Supabase/Neon, bạn chỉ cần mở terminal ở máy local (nơi đã khai báo Database URL production) hoặc cấu hình Vercel build command chạy:
+
 ```bash
 npx prisma db push
 ```
+
 Lệnh này sẽ tự động đẩy toàn bộ cấu trúc Schema (`ShortUrl` model) lên cloud database mà không cần tạo lịch sử migration phức tạp.
 
 ---
