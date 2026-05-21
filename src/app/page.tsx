@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import QRCode from 'qrcode';
+import Image from 'next/image';
 import styles from './page.module.css';
 
 interface ShortUrlItem {
@@ -42,32 +43,6 @@ export default function Home() {
   // --- Refs ---
   const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // --- Hook: Load theme & history on Mount ---
-  useEffect(() => {
-    // Load theme
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
-    if (savedTheme) {
-      setTheme(savedTheme);
-      document.documentElement.setAttribute('data-theme', savedTheme);
-    } else {
-      setTheme('dark');
-      document.documentElement.setAttribute('data-theme', 'dark');
-    }
-
-    // Load history
-    const savedHistory = localStorage.getItem('zlink_history');
-    if (savedHistory) {
-      try {
-        const parsedHistory = JSON.parse(savedHistory) as ShortUrlItem[];
-        setHistory(parsedHistory);
-        // Đồng bộ số click mới nhất từ server cho các link cũ
-        syncClickStats(parsedHistory);
-      } catch (e) {
-        console.error('Lỗi khi đọc lịch sử từ localStorage:', e);
-      }
-    }
-  }, []);
-
   // --- Functions ---
   
   // Hiển thị thông báo Toast
@@ -93,7 +68,7 @@ export default function Home() {
       const data = await response.json();
       if (data.stats && Array.isArray(data.stats)) {
         const statsMap = new Map<string, { clicks: number; title: string | null }>();
-        data.stats.forEach((s: any) => {
+        data.stats.forEach((s: { shortCode: string; clicks: number; title: string | null }) => {
           statsMap.set(s.shortCode, { clicks: s.clicks, title: s.title });
         });
 
@@ -117,6 +92,31 @@ export default function Home() {
       console.error('Lỗi khi đồng bộ thống kê clicks:', error);
     }
   };
+
+  // --- Hook: Load theme & history on Mount ---
+  useEffect(() => {
+    // Chạy bất đồng bộ để tránh cảnh báo linter react-hooks/set-state-in-effect
+    setTimeout(() => {
+      // Load theme
+      const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
+      const initialTheme = savedTheme || 'dark';
+      document.documentElement.setAttribute('data-theme', initialTheme);
+      setTheme(initialTheme);
+
+      // Load history
+      const savedHistory = localStorage.getItem('zlink_history');
+      if (savedHistory) {
+        try {
+          const parsedHistory = JSON.parse(savedHistory) as ShortUrlItem[];
+          setHistory(parsedHistory);
+          // Đồng bộ số click mới nhất từ server cho các link cũ
+          syncClickStats(parsedHistory);
+        } catch (e) {
+          console.error('Lỗi khi đọc lịch sử từ localStorage:', e);
+        }
+      }
+    }, 0);
+  }, []);
 
   // Bật tắt Light/Dark Theme
   const toggleTheme = () => {
@@ -392,12 +392,13 @@ export default function Home() {
                 <div className={styles.qrContainer}>
                   <span className={styles.resultLabel}>Mã QR Code cho link này</span>
                   <div className={styles.qrCodeWrapper}>
-                    <img 
+                    <Image 
                       src={qrCodeDataUrl} 
                       alt="QR Code" 
                       className={styles.qrCodeImg} 
-                      width="160" 
-                      height="160"
+                      width={160} 
+                      height={160}
+                      unoptimized
                     />
                   </div>
                   <a 
@@ -542,11 +543,12 @@ export default function Home() {
               {modalQrItem.shortUrl}
             </div>
             <div className={styles.qrCodeWrapper} style={{ alignSelf: 'center' }}>
-              <img 
+              <Image 
                 src={modalQrDataUrl} 
                 alt="Modal QR Code" 
-                width="240" 
-                height="240"
+                width={240} 
+                height={240}
+                unoptimized
               />
             </div>
             <a 
