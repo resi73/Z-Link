@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error('Lỗi khi rút gọn URL:', error);
     return NextResponse.json(
       { 
