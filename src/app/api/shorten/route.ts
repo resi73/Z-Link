@@ -39,6 +39,10 @@ async function fetchPageTitle(url: string): Promise<string | null> {
   }
 }
 
+export async function GET() {
+  return NextResponse.json({ version: "debug-1", time: new Date().toISOString() });
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
